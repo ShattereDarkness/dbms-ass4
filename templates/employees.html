@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+    <table>
+        <tr>
+            <th>SSN</th>
+            <th>Name</th>
+            <th>Employee ID</th>
+            <th>Address</th>
+            <th>Phone number</th>
+            <th>Job</th>
+            <th>Salary</th>
+            <th>Department ID</th>
+        </tr>
+        {% for ele in row %}
+            <tr>
+                <td>{{ele['ssn']}}</td>
+                <td>{{ele['name']}}</td>
+                <td>{{ele['employeeid']}}</td>
+                <td>{{ele['address']}}</td>
+                <td>{{ele['phone_number']}}</td>
+                <td>{{ele['job']}}</td>
+                <td>{{ele['salary']}}</td>
+                <td>{{ele['departmentid']}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+{% endblock %}

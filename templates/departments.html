@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+    <table>
+        <tr>
+            <th>Department name</th>
+            <th>Department ID</th>
+        </tr>
+        {% for ele in row %}
+            <tr>
+                <td>{{ele['departmentName']}}</td>
+                <td>{{ele['departmentID']}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+{% endblock %}

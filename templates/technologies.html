@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+    <table>
+        <tr>
+            <th>Technology ID</th>
+            <th>Technology name</th>
+            <th>Department ID</th>
+        </tr>
+        {% for ele in row %}
+            <tr>
+                <td>{{ele['techid']}}</td>
+                <td>{{ele['tname']}}</td>
+                <td>{{ele['departmentid']}}</td>
+            </tr>
+        {% endfor %}
+    </table>
+    <br>
+{% endblock %}
+
+"techid": technology.techid
+"tname": technology.tname
+"CompanyID": technology.companyid
+"DepartmentID": technology.departmentid
