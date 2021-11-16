@@ -6,7 +6,7 @@ import sys
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:Messi10@localhost/company_db'
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:abcd@localhost/company_db'
 
 db = SQLAlchemy(app)
 
@@ -46,14 +46,21 @@ def login():
 		# Query database for username
 		# rows = db.execute("SELECT * FROM users WHERE username = :username",
 		# 				username=request.form.get("username"))
-		rows = db.session.query(Company).filter(Company.companyid == int(request.form.get("companyid")))
-		print(rows, file = sys.stdder)
-		# Ensure username exists and password is correct
-		if len(rows) != 1:# or not check_password_hash(rows[0]["hash"], request.form.get("password")):
+		companies = db.session.query(Company).filter(Company.companyid == int(request.form.get("companyid")))
+		
+		results = [
+		{
+			"companyid": company.companyid, 
+			"cname": company.cname
+		}
+		for company in companies]
+
+		# Ensure company exists and password is correct
+		if len(results) != 1:# or not check_password_hash(rows[0]["hash"], request.form.get("password")):
 			return apology("invalid username and/or password", 403)
 
 		# Remember which user has logged in
-		session["companyid"] = request.form.get("companyid")#rows[0]["id"]
+		session["companyid"] = results[0]["companyid"]
 
 		# Redirect user to home page
 		return redirect("/")
