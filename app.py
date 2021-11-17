@@ -62,7 +62,7 @@ class Employee(db.Model):
     salary=db.Column(db.Float())
     companyid=db.Column(db.Integer,primary_key=True)
     departmentid=db.Column(db.Integer,primary_key=True)
-    
+   
     
 
     def __init__(self,ssn,name,employeeid,address,phone_number,job,salary,companyid,departmentid):
@@ -307,7 +307,7 @@ def classes():
 	# 					.add_columns(Teaching.techid, Teaching.teacher_rating, Teaching.teacher_ssn, Teaching.tech_name, Teaching.companyid, Teaching.departmentid, Employee.name)\
 	# 					.filter(Teaching.companyid == session["companyid"])
 	
-	teachers = db.session.execute("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id", {'id': session["companyid"]})
+	teachers = db.session.execute("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id order by teacher_rating desc", {'id': session["companyid"]})
 	# teachers = Teaching.query.from_statement(db.text("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id").params(id=session["companyid"]))
 	teacher_result = [
     {
@@ -325,7 +325,7 @@ def classes():
 	learner_result = dict()
 	for teacher in teacher_result:
 		# learners = Learning.query.filter(Learning.companyid == session["companyid"], Learning.techid == teacher['techid'])
-		learners = db.session.execute("select * from learning inner join employee on learning.trainee_ssn = employee.ssn where learning.companyid=:id and Learning.techid = :techid",
+		learners = db.session.execute("select * from learning inner join employee on learning.trainee_ssn = employee.ssn where learning.companyid=:id and Learning.techid = :techid order by student_score desc",
 		 {'id': session["companyid"], 'techid': teacher['techid']})
 		learner_result[teacher["techid"]] = [
 		{
@@ -385,11 +385,63 @@ def ins1():
 			return error
 
 		
-		return redirect('/technologies')
+		return redirect('/classes')
 	else:
 		return render_template('insertions/insert_teach.html')
+@app.route('/learningIns',methods=["GET","POST"])
+@login_required
+def ins2():
+	if request.method=="POST":
+		student_score=request.form.get('student_score')
+		teacher_ssn=request.form.get('trainee_ssn')
+		techid=request.form.get('techid')
+		tname=request.form.get('tname')
+		companyid=session["companyid"]
+		departmentid=request.form.get('departmentid')
+		try:
+			tec=Learning(student_score,teacher_ssn,tname,techid,companyid, departmentid)
+			
+			db.session.add(tec)
+			db.session.commit()
 
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
 
+		
+		return redirect('/classes')
+	else:
+		return render_template('insertions/insert_learn.html')
+		s
+@app.route('/employeeIns',methods=["GET","POST"])
+@login_required
+def ins2q():
+	if request.method=="POST":
+		salary=request.form.get('salary')
+		ssn=request.form.get('ssn')
+		employeeid=request.form.get('employeeid')
+		address=request.form.get('address')
+		phone_number=request.form.get('phone_number')
+		job=request.form.get('job')
+		departmentid=request.form.get('departmentid')
+		name=request.form.get('name')
+
+		companyid=session["companyid"]
+		departmentid=request.form.get('departmentid')
+		try:
+			tec=Employee(ssn,name,employeeid,address,phone_number,job,salary,companyid,departmentid)
+			
+			db.session.add(tec)
+			db.session.commit()
+
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		
+		return redirect('/employees')
+	else:
+		return render_template('insertions/insert_employee.html')
 @app.route('/insert',methods=["GET","POST"])
 @login_required
 def insert():
