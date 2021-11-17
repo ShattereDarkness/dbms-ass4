@@ -412,7 +412,7 @@ def ins2():
 		return redirect('/classes')
 	else:
 		return render_template('insertions/insert_learn.html')
-		s
+		
 @app.route('/employeeIns',methods=["GET","POST"])
 @login_required
 def ins2q():
