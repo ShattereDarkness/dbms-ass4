@@ -5,33 +5,32 @@
 {% endblock %}
 
 {% block main %}
+        <!-- 
+            Tech ID
+            Teacher Name Rating
+            Learner Name Rating
+
+         -->
         {% for eles in teacher_result %}
+            <h2>{{eles['tech_name']}}</h2>
             <table>
                 <tr>
-                    <th>Tech ID</th>
-                    <th>SSN</th>
+                    <th>Role</th>
+                    <th>Name</th>
                     <th>Rating</th>
-                    <th>Department ID </th>
                 </tr>                      
                 <tr>
-                    <td>{{eles['techid']}}</td> 
-                    <td>{{eles['teacher_ssn']}}</td> 
+                    <td>Teacher</td> 
+                    <!-- <td>Name</td>  -->
+                    <td>{{eles['tname']}}</td>
                     <td>{{eles['teacher_rating']}}</td>
-                    <td>{{eles['departmentid']}}</td>
                 </tr> 
-            </table>
 
-            <table>
-                <tr>
-                    <th>SSN</th>
-                    <th>Rating</th>
-                    <th>Department ID</th>
-                </tr>
                 {% for ele in learner_result[eles.techid] %}    
                     <tr>      
-                        <td>{{ele['trainee_ssn']}}</td> 
+                        <td>Student</td> 
+                        <td>Name</td>
                         <td>{{ele['student_score']}}</td>
-                        <td>{{ele['departmentid']}}</td>
                     </tr>
                 {% endfor %}
             </table>
