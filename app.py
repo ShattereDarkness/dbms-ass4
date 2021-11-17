@@ -1,5 +1,5 @@
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
-from flask_sqlalchemy import SQLAlchemy, and_
+from flask_sqlalchemy import SQLAlchemy
 from helpers import login_required, apology
 from flask_session import Session
 import sys
@@ -7,7 +7,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:abcd@localhost/company_db'
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:Imawesome@localhost/company'
 
 db = SQLAlchemy(app)
 
@@ -105,6 +105,7 @@ class Teaching(db.Model):
     techid= db.Column(db.Integer,primary_key=True)
     companyid=db.Column(db.Integer,primary_key=True)
     departmentid=db.Column(db.Integer,primary_key=True)
+	
 
     def __init__(self, teacher_rating,teacher_ssn,tech_name,techid,companyid, departmentid):
       self.techid=techid
@@ -215,7 +216,8 @@ def index():
 @login_required
 def departments():
 	departments = Department.query.filter(Department.companyid == session["companyid"])
-
+	# ratings_teacher=Teaching.query.filter(Teaching.companyid==session["companyid"]).order_by(Teaching.teacher_rating)
+	# rating_student=Learning.query.filter(Learning.companyid==session["companyid"]).order_by(Learning.student_score)
 	results = [
     {
 		"departmentName": department.dname,
@@ -224,8 +226,27 @@ def departments():
 		"companyID": department.companyid
     }
     for department in departments]
+	
+	# results = [
+    # {
+	# 	"teacher_ssn": rating.teacher_ssn,
+	# 	"teacher_rating":rating.teacher_rating,
+    #     "departmentID": rating.departmentid, 
+		
+    # }
+    # for rating in ratings_teacher]
+	# results2 = [
+    # {
+	# 	"trainee_ssn":rating.trainee_ssn,
+	# 	"student_rating":rating.student_score, 
+	# 	"departmentID": rating.departmentid, 
 
-	return render_template('departments.html', row = results)
+		
+    # }
+    # for rating in rating_student]
+  
+	return render_template('departments.html', row=results)
+
 
 # Show employee table
 @app.route('/employees')
@@ -282,10 +303,11 @@ def classes():
 		"departmentid":  teacher.departmentid
     }
     for teacher in teachers]
-
+# 1
+# 	list of learner==how many learning this technologies
 	learner_result = dict()
 	for teacher in teachers:
-		learners = Learning.query.filter(and_(Learning.companyid == session["companyid"], Learning.techid == teacher.techid))
+		learners = Learning.query.filter(Learning.companyid == session["companyid"], Learning.techid == teacher.techid)
 
 		learner_result[teacher.techid] = [
 		{
@@ -297,8 +319,15 @@ def classes():
 			"departmentid": learner.departmentid
 		}
 		for learner in learners]
+ 
 
-	return render_template('technologies.html', teacher_result = teacher_result, learner_result = learner_result)
+	
+
+
+	return render_template('teaching.html', teacher_result =teacher_result, learner_result = learner_result)
+
+
+
 
 '''
 self.techid=techid

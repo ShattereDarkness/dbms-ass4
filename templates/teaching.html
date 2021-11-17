@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+
+{% block main %}
+        {% for eles in teacher_result %}
+            <table>
+                <tr>
+                    <th>Tech ID</th>
+                    <th>SSN</th>
+                    <th>Rating</th>
+                    <th>Department ID </th>
+                </tr>                      
+                <tr>
+                    <td>{{eles['techid']}}</td> 
+                    <td>{{eles['teacher_ssn']}}</td> 
+                    <td>{{eles['teacher_rating']}}</td>
+                    <td>{{eles['departmentid']}}</td>
+                </tr> 
+            </table>
+
+            <table>
+                <tr>
+                    <th>SSN</th>
+                    <th>Rating</th>
+                    <th>Department ID</th>
+                </tr>
+                {% for ele in learner_result[eles.techid] %}    
+                    <tr>      
+                        <td>{{ele['trainee_ssn']}}</td> 
+                        <td>{{ele['student_score']}}</td>
+                        <td>{{ele['departmentid']}}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br>
+            <br>
+        {% endfor %}
+    </table>
+    <br>
+    
+{% endblock %}
