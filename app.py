@@ -1,6 +1,7 @@
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
+from flask.templating import render_template_string
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import DatabaseError, SQLAlchemyError
 from helpers import login_required, apology
 from flask_session import Session
 import sys
@@ -219,6 +220,8 @@ def index():
 
 	return render_template('index.html', row = results)
 
+
+
 # Show departments table
 @app.route('/departments')
 @login_required
@@ -337,6 +340,10 @@ def classes():
 		for learner in learners]
 
 	return render_template('teaching.html', teacher_result =teacher_result, learner_result = learner_result)
+
+
+
+
 @app.route('/technologiesIns',methods=["GET","POST"])
 @login_required
 def ins():
@@ -345,9 +352,14 @@ def ins():
 		tname=request.form.get('tname')
 		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
-		tec=Technologies(techid, tname, companyid, departmentid)
-		db.session.add(tec)
-		db.session.commit()
+		try:
+
+			tec=Technologies(techid, tname, companyid, departmentid)
+			db.session.add(tec)
+			db.session.commit()
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
 		return redirect('/technologies')
 	else:
 		return render_template('insertions/insert_tech.html')
@@ -356,14 +368,15 @@ def ins():
 @login_required
 def ins1():
 	if request.method=="POST":
+		teacher_rating=request.form.get('teacher_rating')
+		teacher_ssn=request.form.get('teacher_ssn')
 		techid=request.form.get('techid')
 		tname=request.form.get('tname')
 		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
-		
-		
 		try:
-			tec=Teaching(10,"boxo",tname,techid,companyid, departmentid)
+			tec=Teaching(teacher_rating,teacher_ssn,tname,techid,companyid, departmentid)
+			
 			db.session.add(tec)
 			db.session.commit()
 
@@ -386,7 +399,59 @@ def insert():
 	else:
 		return render_template('insertions/insertion_head.html')
 
-	
+@app.route('/update',methods=["GET","POST"])
+@login_required
+def update():
+	if request.method=="POST":
+		x = request.form.get('stuff') + 'Ups'
+		return redirect('/' + x)
+	else:
+		return render_template('updations/updation_head.html')
+
+@app.route('/technologiesUps',methods=["GET","POST"])
+@login_required
+def TechUps():
+	if request.method=="POST":
+		
+	   
+		techid=request.form.get('techid')
+		tname=request.form.get('tname')
+		
+		departmentid=request.form.get('departmentid')
+
+		try:
+			Technologies.query.filter(Technologies.companyid == session["companyid"], Technologies.techid == techid, Technologies.departmentid == departmentid).update({'tname' : (tname)})
+			
+			db.session.commit()
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		return redirect('/technologies')
+	else:
+		return render_template('updations/update_tech.html')
+
+@app.route('/teachingUps',methods=["GET","POST"])
+@login_required
+def TeachUps():
+	if request.method=="POST":
+		teacher_rating=request.form.get('teacher_rating')
+		teacher_ssn=request.form.get('teacher_ssn')
+		techid=request.form.get('techid')
+		tname=request.form.get('tname')
+		companyid=session["companyid"]
+		departmentid=request.form.get('departmentid')
+		try:
+			Technologies.query.filter(Technologies.companyid == session["companyid"], Technologies.techid == techid, Technologies.departmentid == departmentid).update({'tname' : (tname)})
+			
+			db.session.commit()
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		return redirect('/technologies')
+	else:
+		return render_template('updations/update_tech.html')
 
 
 if __name__ == '__main__':  #python interpreter assigns "__main__" to the file you run
@@ -401,3 +466,11 @@ def errorhandler(e):
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
+
+
+
+
+ 
+	# ratings_teach_to_student this one table will have teacher(ssn) student(ssn) rating(1:n relation)  teacher rates the student
+	# ratings_student_to_teach this one table will have teacher(ssn) student(ssn) rating(1:n relation) student rates the teacher 
+	
