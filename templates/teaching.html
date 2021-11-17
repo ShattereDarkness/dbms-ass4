@@ -26,10 +26,10 @@
                     <td>{{eles['teacher_rating']}}</td>
                 </tr> 
 
-                {% for ele in learner_result[eles.techid] %}    
+                {% for ele in learner_result[eles['techid']] %}    
                     <tr>      
                         <td>Student</td> 
-                        <td>Name</td>
+                        <td>{{ele['name']}}</td>
                         <td>{{ele['student_score']}}</td>
                     </tr>
                 {% endfor %}

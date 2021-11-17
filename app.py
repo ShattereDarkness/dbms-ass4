@@ -318,23 +318,21 @@ def classes():
 # 1
 # 	list of learner==how many learning this technologies
 	learner_result = dict()
-	for teacher in teachers:
-		learners = Learning.query.filter(Learning.companyid == session["companyid"], Learning.techid == teacher.techid)
-
-		learner_result[teacher.techid] = [
+	for teacher in teacher_result:
+		# learners = Learning.query.filter(Learning.companyid == session["companyid"], Learning.techid == teacher['techid'])
+		learners = db.session.execute("select * from learning inner join employee on learning.trainee_ssn = employee.ssn where learning.companyid=:id and Learning.techid = :techid",
+		 {'id': session["companyid"], 'techid': teacher['techid']})
+		learner_result[teacher["techid"]] = [
 		{
 			"techid": learner.techid,
 			"student_score": learner.student_score,
 			"trainee_ssn": learner.trainee_ssn,
 			"tech_name": learner.tech_name,
 			"companyid": learner.companyid,
-			"departmentid": learner.departmentid
+			"departmentid": learner.departmentid,
+			"name": learner.name
 		}
 		for learner in learners]
- 
-
-	
-
 
 	return render_template('teaching.html', teacher_result =teacher_result, learner_result = learner_result)
 
