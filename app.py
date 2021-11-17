@@ -301,7 +301,7 @@ def classes():
 	# teachers = Teaching.query.join(Employee)\
 	# 					.add_columns(Teaching.techid, Teaching.teacher_rating, Teaching.teacher_ssn, Teaching.tech_name, Teaching.companyid, Teaching.departmentid, Employee.name)\
 	# 					.filter(Teaching.companyid == session["companyid"])
-	t1=Teaching.query.filter(Teaching.companyid == session["companyid"])
+	
 	teachers = db.session.execute("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id", {'id': session["companyid"]})
 	# teachers = Teaching.query.from_statement(db.text("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id").params(id=session["companyid"]))
 	teacher_result = [
@@ -335,10 +335,35 @@ def classes():
 		for learner in learners]
 
 	return render_template('teaching.html', teacher_result =teacher_result, learner_result = learner_result)
+@app.route('/technologiesIns',methods=["GET","POST"])
+@login_required
+def ins():
+	if request.method=="POST":
+		techid=request.form.get('techid')
+		tname=request.form.get('tname')
+		companyid=request.form.get('companyid')
+		departmentid=request.form.get('departmentid')
+		tec=Technologies(techid, tname, companyid, departmentid)
+		db.session.add(tec)
+		db.session.commit()
+		return redirect('/')
+	else:
+		return redirect('technologies.html')
 
 
+@app.route('/insert',methods=["GET","POST"])
+@login_required
+def insert():
+	if request.method=="POST":
+		x = request.form.get('stuff') + 'Ins'
+		return redirect('/' + x)
+	else:
+		return render_template('insertion_head.html')
+# @app.route('/insert1')
+# @login_required
+# def insert():
 
-
+	
 '''
 self.techid=techid
 self.teacher_rating=teacher_rating

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+{% block main %}
+
+    <form action="/insert" method="post">
+    <label for="head">Insert</label>
+    <select name="stuff" id="cars">
+        <option value="technologies">Technologies</option>
+        <option value="teacher">Teacher</option>
+        <option value="trainee">Trainee</option>
+        <option value="employee">employee</option>
+    </select>
+    <br><br>
+    <input type="submit" value="Submit">
+    </form>
+{% endblock %}
