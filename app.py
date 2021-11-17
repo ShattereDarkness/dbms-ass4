@@ -1,5 +1,6 @@
 from flask import Flask, flash, jsonify, redirect, render_template, request, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 from helpers import login_required, apology
 from flask_session import Session
 import sys
@@ -82,16 +83,17 @@ class Employee(db.Model):
 class Technologies(db.Model):
     __tablename__ = 'technologies'
 
-    techid = db.Column(db.Integer, primary_key=True)
+    techid = db.Column(db.Integer,primary_key=True)
     tname = db.Column(db.String())
     companyid=db.Column(db.Integer,primary_key=True)
     departmentid=db.Column(db.Integer,primary_key=True)
+	
 
     def __init__(self, techid,tname,companyid, departmentid):
       self.techid=techid
       self.tname=tname
-      self.CompanyID=companyid
-      self.DepartmentID = departmentid
+      self.companyid=companyid
+      self.departmentid = departmentid
 #   CREATE TABLE Teaching
 #  (	
 # 	Teacher_rating INT NOT NULL,
@@ -341,14 +343,38 @@ def ins():
 	if request.method=="POST":
 		techid=request.form.get('techid')
 		tname=request.form.get('tname')
-		companyid=request.form.get('companyid')
+		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
 		tec=Technologies(techid, tname, companyid, departmentid)
 		db.session.add(tec)
 		db.session.commit()
-		return redirect('/')
+		return redirect('/technologies')
 	else:
-		return redirect('technologies.html')
+		return render_template('insertions/insert_tech.html')
+
+@app.route('/teachingIns',methods=["GET","POST"])
+@login_required
+def ins1():
+	if request.method=="POST":
+		techid=request.form.get('techid')
+		tname=request.form.get('tname')
+		companyid=session["companyid"]
+		departmentid=request.form.get('departmentid')
+		
+		
+		try:
+			tec=Teaching(10,"boxo",tname,techid,companyid, departmentid)
+			db.session.add(tec)
+			db.session.commit()
+
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		
+		return redirect('/technologies')
+	else:
+		return render_template('insertions/insert_teach.html')
 
 
 @app.route('/insert',methods=["GET","POST"])
@@ -358,27 +384,10 @@ def insert():
 		x = request.form.get('stuff') + 'Ins'
 		return redirect('/' + x)
 	else:
-		return render_template('insertion_head.html')
-# @app.route('/insert1')
-# @login_required
-# def insert():
+		return render_template('insertions/insertion_head.html')
 
 	
-'''
-self.techid=techid
-self.teacher_rating=teacher_rating
-self.teacher_ssn=teacher_ssn
-self.tech_name=tech_name
-self.companyid=companyid
-self.departmentid = departmentid
 
-self.techid=techid
-self.student_score=student_score
-self.trainee_ssn=trainee_ssn
-self.tech_name=tech_name
-self.companyid=companyid
-self.departmentid = departmentid
-'''
 
 if __name__ == '__main__':  #python interpreter assigns "__main__" to the file you run
   app.run(debug = True)
