@@ -17,12 +17,13 @@
                 <tr>
                     <th>Role</th>
                     <th>Name</th>
+                    <th>SSN</th>
                     <th>Rating</th>
                 </tr>                      
                 <tr>
                     <td>Teacher</td> 
-                    <!-- <td>Name</td>  -->
                     <td>{{eles['tname']}}</td>
+                    <td>{{eles['teacher_ssn']}}</td>
                     <td>{{eles['teacher_rating']}}</td>
                 </tr> 
 
@@ -30,6 +31,7 @@
                     <tr>      
                         <td>Student</td> 
                         <td>{{ele['name']}}</td>
+                        <td>{{ele['trainee_ssn']}}</td>
                         <td>{{ele['student_score']}}</td>
                     </tr>
                 {% endfor %}

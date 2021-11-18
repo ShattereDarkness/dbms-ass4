@@ -60,8 +60,8 @@ class Employee(db.Model):
     phone_number=db.Column(db.BigInteger) 
     job= db.Column(db.String()) 
     salary=db.Column(db.Float())
-    companyid=db.Column(db.Integer,primary_key=True)
-    departmentid=db.Column(db.Integer,primary_key=True)
+    companyid=db.Column(db.Integer)
+    departmentid=db.Column(db.Integer)
    
     
 
@@ -109,18 +109,18 @@ class Teaching(db.Model):
 
     teacher_rating= db.Column(db.Integer)
     teacher_ssn= db.Column(db.String(), primary_key=True, nullable=False)
-    tech_name=db.Column(db.String())
+    # tech_name=db.Column(db.String())
     techid= db.Column(db.Integer,primary_key=True)
     companyid=db.Column(db.Integer,primary_key=True)
     departmentid=db.Column(db.Integer,primary_key=True)
     
     
 
-    def __init__(self, teacher_rating,teacher_ssn,tech_name,techid,companyid, departmentid):
+    def __init__(self, teacher_rating,teacher_ssn,techid,companyid, departmentid):
       self.techid=techid
       self.teacher_rating=teacher_rating
       self.teacher_ssn=teacher_ssn
-      self.tech_name=tech_name
+    #   self.tech_name=tech_name
       self.companyid=companyid
       self.departmentid = departmentid
       
@@ -142,16 +142,16 @@ class Learning(db.Model):
 
     student_score= db.Column(db.Integer)
     trainee_ssn= db.Column(db.String(),primary_key=True)
-    tech_name=db.Column(db.String())
+    # tech_name=db.Column(db.String())
     techid= db.Column(db.Integer,primary_key=True)
     companyid=db.Column(db.Integer,primary_key=True)
     departmentid=db.Column(db.Integer,primary_key=True)
 
-    def __init__(self, student_score,trainee_ssn,tech_name,techid,companyid, departmentid):
+    def __init__(self, student_score,trainee_ssn,techid,companyid, departmentid):
       self.techid=techid
       self.student_score=student_score
       self.trainee_ssn=trainee_ssn
-      self.tech_name=tech_name
+    #   self.tech_name=tech_name
       self.companyid=companyid
       self.departmentid = departmentid
 
@@ -307,14 +307,20 @@ def classes():
 	# 					.add_columns(Teaching.techid, Teaching.teacher_rating, Teaching.teacher_ssn, Teaching.tech_name, Teaching.companyid, Teaching.departmentid, Employee.name)\
 	# 					.filter(Teaching.companyid == session["companyid"])
 	
-	teachers = db.session.execute("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id order by teacher_rating desc", {'id': session["companyid"]})
+	teachers = db.session.execute("select * from teaching\
+		 						inner join technologies on\
+								(teaching.techid = technologies.techid and teaching.departmentid = technologies.departmentid and teaching.companyid=technologies.companyid)\
+								inner join employee on teaching.teacher_ssn = employee.ssn\
+								where teaching.companyid=:id",\
+								{'id': session["companyid"]})
+	print(session["companyid"], file=sys.stdout)
 	# teachers = Teaching.query.from_statement(db.text("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id").params(id=session["companyid"]))
 	teacher_result = [
     {
 		"techid": teacher.techid,
 		"teacher_rating": teacher.teacher_rating,
 		"teacher_ssn": teacher.teacher_ssn,
-		"tech_name": teacher.tech_name,
+		"tech_name": teacher.tname,
 		"companyid": teacher.companyid,
 		"departmentid":  teacher.departmentid,
 		"tname": teacher.name
@@ -325,14 +331,17 @@ def classes():
 	learner_result = dict()
 	for teacher in teacher_result:
 		# learners = Learning.query.filter(Learning.companyid == session["companyid"], Learning.techid == teacher['techid'])
-		learners = db.session.execute("select * from learning inner join employee on learning.trainee_ssn = employee.ssn where learning.companyid=:id and Learning.techid = :techid order by student_score desc",
-		 {'id': session["companyid"], 'techid': teacher['techid']})
+		learners = db.session.execute("select * from learning inner join employee on learning.trainee_ssn = employee.ssn\
+									inner join technologies on learning.techid = technologies.techid and learning.companyid=technologies.companyid\
+									where learning.companyid=:id and Learning.techid = :techid order by student_score desc",
+		 							{'id': session["companyid"], 'techid': teacher['techid']})
+
 		learner_result[teacher["techid"]] = [
 		{
 			"techid": learner.techid,
 			"student_score": learner.student_score,
 			"trainee_ssn": learner.trainee_ssn,
-			"tech_name": learner.tech_name,
+			"tech_name": learner.tname,
 			"companyid": learner.companyid,
 			"departmentid": learner.departmentid,
 			"name": learner.name
@@ -371,11 +380,11 @@ def ins1():
 		teacher_rating=request.form.get('teacher_rating')
 		teacher_ssn=request.form.get('teacher_ssn')
 		techid=request.form.get('techid')
-		tname=request.form.get('tname')
+		# tname=request.form.get('tname')
 		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
 		try:
-			tec=Teaching(teacher_rating,teacher_ssn,tname,techid,companyid, departmentid)
+			tec=Teaching(teacher_rating,teacher_ssn,techid,companyid, departmentid)
 			
 			db.session.add(tec)
 			db.session.commit()
@@ -395,11 +404,11 @@ def ins2():
 		student_score=request.form.get('student_score')
 		teacher_ssn=request.form.get('trainee_ssn')
 		techid=request.form.get('techid')
-		tname=request.form.get('tname')
+		# tname=request.form.get('tname')
 		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
 		try:
-			tec=Learning(student_score,teacher_ssn,tname,techid,companyid, departmentid)
+			tec=Learning(student_score,teacher_ssn,techid,companyid, departmentid)
 			
 			db.session.add(tec)
 			db.session.commit()
@@ -503,9 +512,33 @@ def TeachUps():
 
 		return redirect('/technologies')
 	else:
-		return render_template('updations/update_tech.html')
+		return render_template('updations/update_teaching.html')
 
+@app.route('/learningUps',methods=["GET","POST"])
+@login_required
+def ups2():
+	if request.method=="POST":
+		student_score=request.form.get('student_score')
+		trainee_ssn=request.form.get('trainee_ssn')
+		techid=request.form.get('techid')
+		tname=request.form.get('tname')
+		companyid=session["companyid"]
+		departmentid=request.form.get('departmentid')
+		try:
+			Technologies.query.filter(Technologies.companyid == session["companyid"], Technologies.techid == techid, Technologies.departmentid == departmentid)\
+			.update({'tname' : (tname)},{'trainee_ssn':(trainee_ssn)},{'student_score':(student_score)})
+			
+			
+			db.session.commit()
 
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		
+		return redirect('/classes')
+	else:
+		return render_template('insertions/insert_learn.html')
 if __name__ == '__main__':  #python interpreter assigns "__main__" to the file you run
   app.run(debug = True)
 
