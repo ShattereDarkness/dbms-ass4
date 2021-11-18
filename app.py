@@ -12,7 +12,7 @@ from werkzeug.exceptions import default_exceptions, HTTPException, InternalServe
 app = Flask(__name__)
 
 
-app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:Imawesome@localhost/company'
+app.config['SQLALCHEMY_DATABASE_URI']='postgresql://postgres:abcd@localhost/company_db'
 
 db = SQLAlchemy(app)
 
@@ -75,12 +75,7 @@ class Employee(db.Model):
       self.salary=salary
       self.companyid=companyid
       self.departmentid = departmentid
-#   CREATE TABLE TECHNOLOGIES
-#  (	
-# 	TechID INT NOT NULL, 
-# 	Tname VARCHAR(35) NOT NULL,
-# 	CompanyID INT NOT NULL,
-# 	DepartmentID INT NOT NULL,
+
 class Technologies(db.Model):
     __tablename__ = 'technologies'
 
@@ -95,21 +90,12 @@ class Technologies(db.Model):
       self.tname=tname
       self.companyid=companyid
       self.departmentid = departmentid
-#   CREATE TABLE Teaching
-#  (	
-# 	Teacher_rating INT NOT NULL,
-# 	Teacher_SSN CHAR(9) NOT NULL,
-# 	Tech_Name VARCHAR(50) NOT NULL, 
-# 	Techid INT ,
-# 	DepartmentID INT NOT NULL,
-# 	CompanyID INT NOT NULL,
-#PRIMARY KEY (Techid, DepartmentID, CompanyID, Teacher_SSN),
+
 class Teaching(db.Model):
     __tablename__ = 'teaching'
 
     teacher_rating= db.Column(db.Integer)
-    teacher_ssn= db.Column(db.String(), primary_key=True, nullable=False)
-    # tech_name=db.Column(db.String())
+    teacher_ssn= db.Column(db.String(), nullable=False)
     techid= db.Column(db.Integer,primary_key=True)
     companyid=db.Column(db.Integer,primary_key=True)
     departmentid=db.Column(db.Integer,primary_key=True)
@@ -124,19 +110,6 @@ class Teaching(db.Model):
       self.companyid=companyid
       self.departmentid = departmentid
       
-# CREATE TABLE Learning
-#  (	
-# 	Student_score INT NOT NULL,
-# 	Trainee_SSN CHAR(9) NOT NULL,
-# 	Tech_Name VARCHAR(50) NOT NULL, 
-# 	Techid INT ,
-# 	DepartmentID INT NOT NULL,
-# 	CompanyID INT NOT NULL,
-# 	PRIMARY KEY (Techid, DepartmentID, CompanyID, Trainee_SSN),
-# 	FOREIGN KEY (Techid, DepartmentID, CompanyID) REFERENCES Technologies(TechID,DepartmentID,CompanyID),
-# 	FOREIGN KEY(DepartmentID, CompanyID) REFERENCES DEPARTMENT(DepartmentID, CompanyID),
-# 	FOREIGN KEY (Trainee_SSN) REFERENCES Employee(Ssn)
-# 	);
 class Learning(db.Model):
     __tablename__ = 'learning'
 
@@ -174,7 +147,7 @@ def login():
 		# 	return apology("must provide password", 403)
 
 		# Query database for username
-		companies = db.session.query(Company).filter(Company.companyid == int(request.form.get("companyid")))
+		companies = db.session.query(Company).filter(Company.companyid == request.form.get("companyid"))
 		
 		results = [
 		{
@@ -185,7 +158,7 @@ def login():
 
 		# Ensure company exists and password is correct
 		if len(results) != 1:# or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-			return apology("invalid username and/or password", 403)
+			return apology("invalid Company ID", 403)
 
 		# Remember which user has logged in
 		session["companyid"] = results[0]["companyid"]
@@ -313,7 +286,7 @@ def classes():
 								inner join employee on teaching.teacher_ssn = employee.ssn\
 								where teaching.companyid=:id",\
 								{'id': session["companyid"]})
-	print(session["companyid"], file=sys.stdout)
+	# print(session["companyid"], file=sys.stdout)
 	# teachers = Teaching.query.from_statement(db.text("select * from teaching inner join employee on teaching.teacher_ssn = employee.ssn where Teaching.companyid=:id").params(id=session["companyid"]))
 	teacher_result = [
     {
@@ -351,6 +324,14 @@ def classes():
 	return render_template('teaching.html', teacher_result =teacher_result, learner_result = learner_result)
 
 
+@app.route('/insert',methods=["GET","POST"])
+@login_required
+def insert():
+	if request.method=="POST":
+		x = request.form.get('stuff') + 'Ins'
+		return redirect('/' + x)
+	else:
+		return render_template('insertions/insertion_head.html')
 
 
 @app.route('/technologiesIns',methods=["GET","POST"])
@@ -402,13 +383,12 @@ def ins1():
 def ins2():
 	if request.method=="POST":
 		student_score=request.form.get('student_score')
-		teacher_ssn=request.form.get('trainee_ssn')
+		trainee_ssn=request.form.get('trainee_ssn')
 		techid=request.form.get('techid')
-		# tname=request.form.get('tname')
 		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
 		try:
-			tec=Learning(student_score,teacher_ssn,techid,companyid, departmentid)
+			tec=Learning(student_score,trainee_ssn,techid,companyid, departmentid)
 			
 			db.session.add(tec)
 			db.session.commit()
@@ -434,9 +414,9 @@ def ins2q():
 		job=request.form.get('job')
 		departmentid=request.form.get('departmentid')
 		name=request.form.get('name')
-
 		companyid=session["companyid"]
 		departmentid=request.form.get('departmentid')
+
 		try:
 			tec=Employee(ssn,name,employeeid,address,phone_number,job,salary,companyid,departmentid)
 			
@@ -451,14 +431,7 @@ def ins2q():
 		return redirect('/employees')
 	else:
 		return render_template('insertions/insert_employee.html')
-@app.route('/insert',methods=["GET","POST"])
-@login_required
-def insert():
-	if request.method=="POST":
-		x = request.form.get('stuff') + 'Ins'
-		return redirect('/' + x)
-	else:
-		return render_template('insertions/insertion_head.html')
+
 
 @app.route('/update',methods=["GET","POST"])
 @login_required
@@ -473,17 +446,25 @@ def update():
 @login_required
 def TechUps():
 	if request.method=="POST":
-		
-	   
-		techid=request.form.get('techid')
-		tname=request.form.get('tname')
-		
+		companyid=session["companyid"]	   
+		techid=request.form.get('techid')		
 		departmentid=request.form.get('departmentid')
 
 		try:
-			Technologies.query.filter(Technologies.companyid == session["companyid"], Technologies.techid == techid, Technologies.departmentid == departmentid).update({'tname' : (tname)})
-			
-			db.session.commit()
+			q = Technologies.query.filter(
+					Technologies.companyid == companyid,
+					Technologies.techid == techid,
+					Technologies.departmentid == departmentid
+				)
+
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/technologiesUps')
+			else:
+				tname = request.form.get('tname') or q[0].tname
+				q.update({'tname' : (tname)})
+				
+				db.session.commit()
 		except SQLAlchemyError as e:
 			error = str(e.__dict__['orig'])
 			return error
@@ -496,16 +477,28 @@ def TechUps():
 @login_required
 def TeachUps():
 	if request.method=="POST":
-		teacher_rating=request.form.get('teacher_rating')
-		teacher_ssn=request.form.get('teacher_ssn')
-		techid=request.form.get('techid')
-		tname=request.form.get('tname')
 		companyid=session["companyid"]
+		techid=request.form.get('techid')
 		departmentid=request.form.get('departmentid')
+
 		try:
-			Technologies.query.filter(Technologies.companyid == session["companyid"], Technologies.techid == techid, Technologies.departmentid == departmentid).update({'tname' : (tname)})
+			# Get record
+			q = Teaching.query.filter(
+				Teaching.companyid == companyid, Teaching.techid == techid, Teaching.departmentid == departmentid
+			)
 			
-			db.session.commit()
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/teachingUps')
+			else:
+				tname = request.form.get('tname') or q.tname
+				teacher_rating = request.form.get('teacher_rating') or q.teacher_rating
+				teacher_ssn = request.form.get('teacher_ssn')  or q.teacher_ssn
+
+				q.update({'tname' : (tname)}, {'teacher_rating' : (teacher_rating)}, {'teacher_ssn' : (teacher_ssn)})
+				
+				db.session.commit()
+
 		except SQLAlchemyError as e:
 			error = str(e.__dict__['orig'])
 			return error
@@ -516,20 +509,26 @@ def TeachUps():
 
 @app.route('/learningUps',methods=["GET","POST"])
 @login_required
-def ups2():
-	if request.method=="POST":
-		student_score=request.form.get('student_score')
-		trainee_ssn=request.form.get('trainee_ssn')
-		techid=request.form.get('techid')
-		tname=request.form.get('tname')
-		companyid=session["companyid"]
-		departmentid=request.form.get('departmentid')
+def LearnUps():
+	if request.method == "POST":
+		companyid = session["companyid"]
+		trainee_ssn = request.form.get('trainee_ssn')
+		techid = request.form.get('techid')
+		departmentid = request.form.get('departmentid')
 		try:
-			Technologies.query.filter(Technologies.companyid == session["companyid"], Technologies.techid == techid, Technologies.departmentid == departmentid)\
-			.update({'tname' : (tname)},{'trainee_ssn':(trainee_ssn)},{'student_score':(student_score)})
-			
-			
-			db.session.commit()
+			q = Learning.query.filter(
+					Learning.companyid == session["companyid"],
+					Learning.techid == techid,
+					Learning.departmentid == departmentid,
+					Learning.trainee_ssn == trainee_ssn
+				)
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/learningUps')
+			else:
+				student_score = request.form.get('student_score') or q[0].student_score				
+				q.update({'student_score':(student_score)})
+				db.session.commit()
 
 		except SQLAlchemyError as e:
 			error = str(e.__dict__['orig'])
@@ -538,7 +537,181 @@ def ups2():
 		
 		return redirect('/classes')
 	else:
-		return render_template('insertions/insert_learn.html')
+		return render_template('updations/update_learning.html')
+
+@app.route('/employeeUps',methods=["GET","POST"])
+@login_required
+def EmployeeUps():
+	if request.method == "POST":
+		companyid=session["companyid"]
+		ssn=request.form.get('ssn')
+		try:
+			q = Employee.query.filter(Employee.ssn == ssn)
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/employeeUps')
+			else:				
+				salary = request.form.get('salary') or q[0].salary
+				employeeid = request.form.get('employeeid') or q[0].employeeid
+				address = request.form.get('address') or q[0].address
+				phone_number = request.form.get('phone_number') or q[0].phone_number
+				job = request.form.get('job') or q[0].job
+				departmentid = request.form.get('departmentid') or q[0].departmentid
+				name = request.form.get('name')	or q[0].name
+
+				q.update(
+						{'salary':(salary)},
+						{'employeeid':(employeeid)},
+						{'employeeid':(employeeid)},
+						{'phone_number':(phone_number)},
+						{'job':(job)},
+						{'departmentid':(departmentid)},
+						{'name':(name)}
+					)
+				db.session.commit()
+
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		
+		return redirect('/employees')
+	else:
+		return render_template('updations/update_employee.html')
+
+
+@app.route('/delete',methods=["GET","POST"])
+@login_required
+def delete():
+	if request.method == "POST":
+		x = '/' + request.form.get('stuff') + 'Del'
+		return redirect(x)
+	else:
+		return render_template('deletions/deletion_head.html')
+
+@app.route('/technologiesDel',methods=["GET","POST"])
+@login_required
+def v():
+	if request.method == "POST":
+		techid = request.form.get('techid')
+		companyid = session["companyid"]
+		departmentid = request.form.get('departmentid')
+
+		try:
+			# Delete record
+			q = Technologies.query.filter(
+				Technologies.companyid == companyid,
+				Technologies.departmentid == departmentid,
+				Technologies.techid == techid
+			)
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/technologiesDel')
+			else:
+				q.delete()
+				db.session.commit()
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		return redirect('/technologies')
+	else:
+		return render_template('deletions/delete_tech.html')
+
+@app.route('/teachingDel',methods=["GET","POST"])
+@login_required
+def teachingDel():
+	if request.method == "POST":
+		companyid = session["companyid"]
+		techid = request.form.get('techid')
+		departmentid = request.form.get('departmentid')
+
+		try:
+			# Delete teacher
+			q = Teaching.query.filter(
+				Teaching.companyid == companyid,
+				Teaching.departmentid == departmentid,
+				Teaching.techid == techid
+			)
+			
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/teachingDel')
+
+			else:
+				q.delete()
+				db.session.commit()
+		
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		return redirect('/classes')
+	else:
+		return render_template('deletions/delete_teach.html')
+
+@app.route('/learningDel',methods=["GET","POST"])
+@login_required
+def learningDel():
+	if request.method == "POST":
+		companyid = session["companyid"]
+		trainee_ssn = request.form.get('trainee_ssn')
+		techid = request.form.get('techid')
+		departmentid = request.form.get('departmentid')
+
+		try:
+			# Delete learner
+			q = Learning.query.filter(
+				Learning.companyid == companyid,
+				Learning.departmentid == departmentid,
+				Learning.techid == techid,
+				Learning.trainee_ssn == trainee_ssn
+			)
+			
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/learningDel')
+
+			else:
+				q.delete()
+				db.session.commit()
+
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+
+		
+		return redirect('/classes')
+	else:
+		return render_template('deletions/delete_learn.html')
+		
+@app.route('/employeeDel',methods=["GET","POST"])
+@login_required
+def employeeDel():
+	if request.method == "POST":
+		ssn = request.form.get('ssn')
+
+		try:
+			# Delete employee
+			q = Employee.query.filter(Employee.ssn == ssn)
+			
+			if q.count() == 0:
+				flash("No such record exists")
+				return redirect('/employeeDel')
+
+			else:
+				q.delete()
+				db.session.commit()
+
+		except SQLAlchemyError as e:
+			error = str(e.__dict__['orig'])
+			return error
+		
+		return redirect('/employees')
+	else:
+		return render_template('deletions/delete_employee.html')
+
+
 if __name__ == '__main__':  #python interpreter assigns "__main__" to the file you run
   app.run(debug = True)
 
