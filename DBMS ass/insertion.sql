@@ -1,4 +1,4 @@
-\c company
+\c company_db
 
 insert into company values (1, 'Apple');
 insert into company values (2, 'AMD');

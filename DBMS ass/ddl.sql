@@ -1,6 +1,7 @@
-drop database company;
-create database company;
-\c company
+drop database company_db;
+create database company_db;
+\c company_db
+
 CREATE TABLE COMPANY
 (
 	CompanyID INT,
@@ -13,7 +14,7 @@ CREATE TABLE DEPARTMENT
 	CompanyID INT,
 	DepartmentID Int,
 	PRIMARY KEY (DepartmentID, CompanyID),
-	UNIQUE (Dname),
+	-- UNIQUE (Dname),
 	
 	FOREIGN KEY (CompanyID) REFERENCES  COMPANY(CompanyID)
 );
@@ -30,7 +31,6 @@ CREATE TABLE Employee
 	DepartmentID INT NOT NULL,
 	CompanyID INT NOT NULL,
 	PRIMARY KEY (Ssn),
-	UNIQUE (EmployeeID),
 	FOREIGN KEY(DepartmentID, CompanyID) REFERENCES DEPARTMENT(DepartmentID, CompanyID)
 );
 CREATE TABLE TECHNOLOGIES
@@ -45,7 +45,7 @@ CREATE TABLE TECHNOLOGIES
 CREATE TABLE Teaching
  (	
 	Teacher_rating INT NOT NULL,
-	Teacher_SSN CHAR(9) NOT NULL,
+	Teacher_SSN CHAR(9) NOT NULL, 
 	Techid INT ,
 	DepartmentID INT NOT NULL,
 	CompanyID INT NOT NULL,
@@ -72,4 +72,3 @@ CREATE TABLE Learning
 --Add the following constraint after the data values have been entered into the tables.
 
 --Alter Table Department Add Constraint Fkey_mgr_ssn FOREIGN KEY (Mgr_ssn) REFERENCES  EMPLOYEE(Ssn)
-
