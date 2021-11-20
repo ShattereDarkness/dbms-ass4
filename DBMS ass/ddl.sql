@@ -49,7 +49,6 @@ CREATE TABLE Teaching
 	Techid INT ,
 	DepartmentID INT NOT NULL,
 	CompanyID INT NOT NULL,
-	
 	PRIMARY KEY (Techid, DepartmentID, CompanyID),
 	FOREIGN KEY (Techid,DepartmentID, CompanyID) REFERENCES Technologies(TechID,DepartmentID,CompanyID),
 	FOREIGN KEY(DepartmentID, CompanyID) REFERENCES DEPARTMENT(DepartmentID, CompanyID),
@@ -63,9 +62,11 @@ CREATE TABLE Learning
 	DepartmentID INT NOT NULL,
 	CompanyID INT NOT NULL,
 	PRIMARY KEY (Techid, DepartmentID, CompanyID, Trainee_SSN),
-	FOREIGN KEY (Techid, DepartmentID, CompanyID) REFERENCES Technologies(TechID,DepartmentID,CompanyID),
-	FOREIGN KEY(DepartmentID, CompanyID) REFERENCES DEPARTMENT(DepartmentID, CompanyID),
-	FOREIGN KEY (Trainee_SSN) REFERENCES Employee(Ssn)
+	constraint learning_techid_fkey
+		FOREIGN KEY (Techid, DepartmentID, CompanyID) REFERENCES Teaching(TechID,DepartmentID,CompanyID)
+		ON DELETE CASCADE,
+		FOREIGN KEY(DepartmentID, CompanyID) REFERENCES DEPARTMENT(DepartmentID, CompanyID),
+		FOREIGN KEY (Trainee_SSN) REFERENCES Employee(Ssn)
 	);
 
 
