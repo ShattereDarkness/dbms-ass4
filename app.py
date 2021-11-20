@@ -491,11 +491,19 @@ def TeachUps():
 				flash("No such record exists")
 				return redirect('/teachingUps')
 			else:
-				tname = request.form.get('tname') or q.tname
-				teacher_rating = request.form.get('teacher_rating') or q.teacher_rating
-				teacher_ssn = request.form.get('teacher_ssn')  or q.teacher_ssn
+				teacher_rating = request.form.get('teacher_rating') or q[0].teacher_rating
+				teacher_ssn = request.form.get('teacher_ssn')  or q[0].teacher_ssn
 
-				q.update({'tname' : (tname)}, {'teacher_rating' : (teacher_rating)}, {'teacher_ssn' : (teacher_ssn)})
+				db.session.execute('''UPDATE Teaching SET teacher_rating=:teacher_rating,   
+				teacher_ssn=:teacher_ssn     
+				WHERE   
+				companyid=:companyid and techid=:techid and departmentid=:departmentid ''',{
+						'teacher_rating':(teacher_rating),
+						'teacher_ssn':(teacher_ssn),
+						'companyid':companyid,
+						'techid':techid,
+						'departmentid':departmentid}						
+					)
 				
 				db.session.commit()
 
@@ -503,7 +511,7 @@ def TeachUps():
 			error = str(e.__dict__['orig'])
 			return error
 
-		return redirect('/technologies')
+		return redirect('/classes')
 	else:
 		return render_template('updations/update_teaching.html')
 
@@ -558,16 +566,26 @@ def EmployeeUps():
 				job = request.form.get('job') or q[0].job
 				departmentid = request.form.get('departmentid') or q[0].departmentid
 				name = request.form.get('name')	or q[0].name
-
-				q.update(
-						{'salary':(salary)},
-						{'employeeid':(employeeid)},
-						{'employeeid':(employeeid)},
-						{'phone_number':(phone_number)},
-						{'job':(job)},
-						{'departmentid':(departmentid)},
-						{'name':(name)}
-					)
+				
+				# q.update(
+						
+				# 	)
+				db.session.execute('''UPDATE Employee SET salary=:salary,   
+				employeeid = :employeeid,
+				address=:address,
+				phone_number=:phone_number,
+				job=:job,
+				departmentid=:departmentid,
+				name=:name     
+				WHERE   
+				ssn=:ssn''',{'salary':(salary),
+						'employeeid':(employeeid),
+						'address':(address),
+						'phone_number':(phone_number),
+						'job':(job),
+						'departmentid':(departmentid),
+						'name':(name),
+						'ssn':ssn})
 				db.session.commit()
 
 		except SQLAlchemyError as e:
