@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+
+    <form action="/teachingDel" method="post">
+        <div class="form-group">            
+            <input autocomplete="off" autofocus class="form-control" name="departmentid" placeholder="Department ID" type="text"><br><br>
+            <input autocomplete="off" autofocus class="form-control" name="techid" placeholder="Tech ID" type="text"><br><br>
+        </div>
+        
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form> 
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Index
+{% endblock %}
+{% block main %}
+
+    <form action="/update" method="post">
+    <label for="head">Update</label>
+    <select name="stuff" id="cars">
+        <option value="technologies">Technologies</option>
+        <option value="teaching">Teaching</option>
+        <option value="learning">Learning</option>
+        <option value="employee">Employee</option>
+    </select>
+    <br><br>
+    <input type="submit" value="Submit">
+    </form>
+{% endblock %}

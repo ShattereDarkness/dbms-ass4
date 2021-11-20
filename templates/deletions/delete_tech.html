@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Delete technologies
+{% endblock %}
+
+{% block main %}
+    <form action="/technologiesDel" method="post">
+        <div class="form-group">            
+            <input autocomplete="off" autofocus class="form-control" name="departmentid" placeholder="Department ID" type="text"/>
+            <input autocomplete="off" autofocus class="form-control" name="techid" placeholder="Tech ID" type="text"/>
+        </div>
+        
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form> 
+{% endblock %}
